@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Search Books</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+<style>
+
+body{
+background-image:url("https://images.unsplash.com/photo-1524995997946-a1c2e315a42f");
+background-size:cover;
+background-position:center;
+background-attachment:fixed;
+font-family:Segoe UI;
+}
+
+.overlay{
+background:rgba(0,0,0,0.75);
+min-height:100vh;
+padding-top:40px;
+color:white;
+}
+
+.search-box{
+max-width:500px;
+margin:auto;
+}
+
+.book-card{
+background:rgba(255,255,255,0.08);
+backdrop-filter:blur(10px);
+border-radius:20px;
+padding:20px;
+color:white;
+transition:0.3s;
+}
+
+.book-card:hover{
+transform:translateY(-6px);
+box-shadow:0 10px 25px rgba(0,0,0,0.5);
+}
+
+.book-img{
+height:180px;
+object-fit:cover;
+border-radius:10px;
+}
+
+.badge{
+font-size:13px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="overlay">
+
+<div class="container">
+
+<!-- HEADER -->
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+<h2>📚 Search Books</h2>
+
+<a href="student-dashboard.html" class="btn btn-light">
+<i class="bi bi-arrow-left"></i> Dashboard
+</a>
+
+</div>
+
+<!-- SEARCH -->
+
+<div class="search-box mb-5">
+
+<div class="input-group">
+
+<input id="title" class="form-control" placeholder="Search book title">
+
+<button class="btn btn-primary" onclick="searchBook()">
+<i class="bi bi-search"></i> Search
+</button>
+
+</div>
+
+</div>
+
+<!-- RESULTS -->
+
+<div class="row g-4" id="bookList">
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function searchBook(){
+
+const title=document.getElementById("title").value;
+
+fetch(`http://localhost:8080/books/search?title=${title}`)
+
+.then(res=>res.json())
+
+.then(data=>{
+
+const container=document.getElementById("bookList");
+
+container.innerHTML="";
+
+if(data.length===0){
+
+container.innerHTML=`
+<div class="text-center text-danger">
+No books found
+</div>
+`;
+
+return;
+
+}
+
+data.forEach(book=>{
+
+let statusBadge="";
+
+if(book.quantity>0){
+
+statusBadge=`<span class="badge bg-success">Available</span>`;
+
+}else{
+
+statusBadge=`<span class="badge bg-danger">Unavailable</span>`;
+
+}
+
+let cover="https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=400&q=60";
+const card=document.createElement("div");
+
+card.className="col-md-4";
+
+card.innerHTML=`
+
+<div class="book-card">
+
+<img src="${cover}" class="book-img w-100 mb-3">
+
+<h5>${book.title}</h5>
+
+<p class="mb-1"><b>Author:</b> ${book.author}</p>
+
+<p class="mb-1"><b>Category:</b> ${book.category}</p>
+
+<p class="mb-2"><b>Quantity:</b> ${book.quantity}</p>
+
+${statusBadge}
+
+<div class="mt-3">
+
+<button class="btn btn-warning btn-sm"
+onclick="requestBook(${book.id},'${book.title}')">
+Request Book
+</button>
+
+</div>
+
+</div>
+
+`;
+
+container.appendChild(card);
+
+});
+
+});
+
+}
+
+function requestBook(bookId,bookTitle){
+
+const student=localStorage.getItem("student");
+
+fetch("http://localhost:8080/book-request/book",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+studentName:student,
+bookId:bookId,
+bookTitle:bookTitle
+
+})
+
+})
+
+.then(res=>res.json())
+
+.then(data=>{
+
+alert("📩 Book request sent to admin");
+
+})
+
+.catch(err=>{
+
+alert("Request failed");
+
+});
+
+}
+
+</script>
+
+</body>
+
+</html>

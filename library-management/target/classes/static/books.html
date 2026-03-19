@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Manage Books</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+<style>
+
+body{
+background:#f4f6f9;
+font-family:Segoe UI;
+}
+
+.navbar{
+background:#2c3e50;
+}
+
+.navbar-brand{
+color:white !important;
+font-weight:bold;
+}
+
+.container{
+margin-top:40px;
+}
+
+.card{
+border:none;
+border-radius:12px;
+box-shadow:0 6px 20px rgba(0,0,0,0.1);
+}
+
+</style>
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-dark">
+
+<div class="container-fluid">
+
+<span class="navbar-brand">📚 Manage Books</span>
+
+<a href="admin-dashboard.html" class="btn btn-light">Dashboard</a>
+
+</div>
+
+</nav>
+
+<div class="container">
+
+<div class="card p-4">
+
+<h4 class="mb-3">Books List</h4>
+
+<table class="table table-hover">
+
+<thead class="table-dark">
+
+<tr>
+
+<th>ID</th>
+<th>Title</th>
+<th>Author</th>
+<th>Category</th>
+<th>Quantity</th>
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody id="bookTable">
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<script>
+
+function loadBooks(){
+
+fetch("http://localhost:8080/books")
+
+.then(res => res.json())
+
+.then(data => {
+
+const table = document.getElementById("bookTable");
+
+table.innerHTML="";
+
+data.forEach(book => {
+
+const row = document.createElement("tr");
+
+row.innerHTML = `
+
+<td>${book.id}</td>
+<td>${book.title}</td>
+<td>${book.author}</td>
+<td>${book.category}</td>
+<td>${book.quantity}</td>
+
+<td>
+
+<button class="btn btn-danger btn-sm"
+onclick="deleteBook(${book.id})">
+
+<i class="bi bi-trash"></i>
+
+</button>
+
+</td>
+
+`;
+
+table.appendChild(row);
+
+});
+
+});
+
+}
+
+function deleteBook(id){
+
+if(!confirm("Delete this book?")) return;
+
+fetch(`http://localhost:8080/books/${id}`,{
+method:"DELETE"
+})
+.then(() => {
+
+alert("Book Deleted");
+
+loadBooks();
+
+});
+
+}
+
+loadBooks();
+
+</script>
+
+</body>
+
+</html>
